@@ -1,3 +1,4 @@
+import sqlite3
 import requests
 import typing
 
@@ -69,4 +70,38 @@ class Repository:
 
             yield [Commit(cmt) for cmt in json_data]
 
- 
+
+    def save_acommit(self,commit:Commit,cur):
+        cur.execute("insert into commits(sha, username,timestamp) values (?,?,?)",
+            (commit.sha,
+            commit.author_github_username,
+            commit.timestamp)
+        )
+
+        print("Committed commit with : {} \n{} \n{}".format(
+        commit.author_github_username,
+        commit.sha,
+        commit.timestamp
+        ))
+
+        return True
+
+    def save_commits(self):
+        try:
+            all_commits = self.get_commits()
+            conn = sqlite3.connect('test.db')
+            cur =conn.cursor()
+            for gen in all_commits:
+                for commit in gen:
+                    if self.save_acommit(commit,cur):
+                        print("Commit with SHA : {} has been saved.".format(commit.sha))
+            conn.commit()
+            print("All commits have been saved to db.")
+            cur.close()
+
+        except sqlite3.Error as error:
+            print("Failed to insert commit data due to : \n {}".format(error))
+        
+        finally:
+            if conn:
+                conn.close()
