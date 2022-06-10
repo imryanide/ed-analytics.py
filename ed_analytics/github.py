@@ -86,7 +86,7 @@ class Repository:
 
         return True
 
-    def save_commits(self):
+    def __save_commits(self):
         try:
             all_commits = self.get_commits()
             conn = sqlite3.connect('test.db')
@@ -105,3 +105,15 @@ class Repository:
         finally:
             if conn:
                 conn.close()
+
+    def save_commits(self):
+        with sqlite3.connect('test.db') as conn:
+            gen = self.get_commits()
+            cur=conn.cursor()
+            for page in gen:
+                for commit in page:
+                    if not self.save_acommit(commit,cur):
+                        continue
+                    print("Commit with SHA : {} has been saved.".format(commit.sha))
+            conn.commit()
+            print("All commits have been saved to DB")
