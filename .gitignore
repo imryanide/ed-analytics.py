@@ -130,7 +130,9 @@ dmypy.json
 
 # Customs
 .DS_Store
-scratchs/
-.vscode/
 
+scratchs/*
+!scratchs/context.py
+
+.vscode/
 .replit
